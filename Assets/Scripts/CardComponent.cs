@@ -18,6 +18,8 @@ public class CardComponent : MonoBehaviour
 
     private CardConfig _assignedCardConfig;
 
+    public CardConfig AssignedCardConfig => _assignedCardConfig;
+
     public void Initialize(CardConfig config, Vector2 layoutIndex)
     {
         _assignedCardConfig = config;

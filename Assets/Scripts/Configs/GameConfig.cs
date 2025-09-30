@@ -8,5 +8,7 @@ namespace Configs
     {
         public List<DifficultyConfig> DifficultyConfigs;
         public List<CardConfig> AllCardsConfigs;
+        public int TotalRounds = 5;
+        public float CardShowDuration = 2f;
     }
 }

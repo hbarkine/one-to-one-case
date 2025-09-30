@@ -11,14 +11,14 @@ public class GameStateMachine : IInitializable, IDisposable
     {
         InitialState,
         Menu,
-        Level
+        Playing
         
     }
 
     private enum GameStateMachineTrigger
     {
         LoadMenuTrigger,
-        LoadLevelTrigger,
+        PlayTrigger,
     }
     
     private StateMachine<GameState, GameStateMachineTrigger> _gameStateMachine;
@@ -32,9 +32,24 @@ public class GameStateMachine : IInitializable, IDisposable
         _gameStateMachine.Configure(GameState.Menu)
             .OnEntry(OnMenuEntry)
             .OnExit(OnMenuExit)
-            .Permit(GameStateMachineTrigger.LoadLevelTrigger, GameState.Level);
+            .Permit(GameStateMachineTrigger.PlayTrigger, GameState.Playing);
+
+        _gameStateMachine.Configure(GameState.Playing)
+            .OnEntry(OnPlayingEntry)
+            .OnExit(OnPlayingExit)
+            .Permit(GameStateMachineTrigger.PlayTrigger, GameState.Playing);
+        
+        _gameStateMachine.Activate();
     }
-    
+
+    private void OnPlayingExit()
+    {
+    }
+
+    private void OnPlayingEntry()
+    {
+    }
+
     private void OnMenuEntry()
     {
         
@@ -42,7 +57,6 @@ public class GameStateMachine : IInitializable, IDisposable
     
     private void OnMenuExit()
     {
-        throw new NotImplementedException();
     }
 
     public void Dispose()
