@@ -23,7 +23,7 @@ public class GameStateMachine : IInitializable, IDisposable
         GameCompletedTrigger
     }
     
-    private StateMachine<GameState, GameStateMachineTrigger> _gameStateMachine = new StateMachine<GameState, GameStateMachineTrigger>();
+    private StateMachine<GameState, GameStateMachineTrigger> _gameStateMachine = new StateMachine<GameState, GameStateMachineTrigger>(GameState.InitialState);
 
     public void Initialize()
     {

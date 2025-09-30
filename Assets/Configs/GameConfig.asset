@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DifficultyConfigs:
   - {fileID: 11400000, guid: e3893661d17db4f8aa1f161093cb7324, type: 2}
+  - {fileID: 11400000, guid: 0da0237cc5907455dbc35fa5d5f67287, type: 2}
+  - {fileID: 11400000, guid: 42764001861854310940793d9bd1a3f7, type: 2}
   - {fileID: 11400000, guid: c0c43e012053a42eea7f3377c42f6891, type: 2}
   - {fileID: 11400000, guid: 01479779e1fcc4a6ab520c37662fa465, type: 2}
-  - {fileID: 11400000, guid: 42764001861854310940793d9bd1a3f7, type: 2}
-  - {fileID: 11400000, guid: 0da0237cc5907455dbc35fa5d5f67287, type: 2}
   AllCardsConfigs:
   - {fileID: 11400000, guid: 39cfbe224916142e2bf81f080dbbc91b, type: 2}
   - {fileID: 11400000, guid: 2cdcc02fcc3924d628f04be5a53999f5, type: 2}

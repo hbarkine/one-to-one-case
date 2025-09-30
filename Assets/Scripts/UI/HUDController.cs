@@ -27,6 +27,7 @@ namespace UI
         private int _currentScore;
         private int _currentRound;
         private int _currentCombo;
+        private int _totalRounds;
 
         public void Initialize()
         {
@@ -58,6 +59,7 @@ namespace UI
         private void OnRoundChanged(RoundChangedSignal signal)
         {
             _currentRound = signal.CurrentRound;
+            _totalRounds = signal.TotalRounds;
             UpdateRoundDisplay();
         }
 
@@ -80,7 +82,7 @@ namespace UI
 
         private void UpdateRoundDisplay()
         {
-            _roundText.text = $"Round: {_currentRound}";
+            _roundText.text = $"Round: {_currentRound}/{_totalRounds}";
         }
 
         private void UpdateComboDisplay()

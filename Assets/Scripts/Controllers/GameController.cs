@@ -95,17 +95,20 @@ namespace Controllers
         private void OnGameStarted(GameStartedSignal signal)
         {
             _currentRound = signal.RoundCount;
+            _currentDifficulty = signal.DifficultyConfig;
             _currentScore = 0;
             _comboCounter = 0;
-            _signalBus.Fire(new RoundChangedSignal { CurrentRound = _currentRound });
+            _signalBus.Fire(new RoundChangedSignal 
+            { 
+                CurrentRound = _currentRound,
+                TotalRounds = _gameConfig.TotalRounds
+            });
             _stateMachine.Fire(GameControllerTrigger.GameStarted);
         }
 
         private void OnInitializeRoundEntry()
         {
             _successfulMatches = 0;
-            
-            _currentDifficulty = _gameConfig.DifficultyConfigs[0];
             
             int gridX = (int)_currentDifficulty.LevelLayout.x;
             int gridY = (int)_currentDifficulty.LevelLayout.y;
@@ -199,7 +202,11 @@ namespace Controllers
                 else
                 {
                     _currentRound++;
-                    _signalBus.Fire(new RoundChangedSignal { CurrentRound = _currentRound });
+                    _signalBus.Fire(new RoundChangedSignal 
+                    { 
+                        CurrentRound = _currentRound,
+                        TotalRounds = _gameConfig.TotalRounds
+                    });
                     _stateMachine.Fire(GameControllerTrigger.AllCardsCompleted);
                 }
             }

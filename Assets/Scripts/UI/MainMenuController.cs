@@ -51,9 +51,13 @@ namespace UI
 
         public void OnStartGameButtonClicked()
         {
-            Hide(() =>
-            {
-                _signalBus.Fire(new GameStartedSignal { RoundCount = 1 });
+            DifficultyConfig selectedDifficulty = _gameConfig.DifficultyConfigs[_selectedDifficultyIndex];
+
+            Hide();
+            _signalBus.Fire(new GameStartedSignal 
+            { 
+                RoundCount = _gameConfig.TotalRounds,
+                DifficultyConfig = selectedDifficulty
             });
         }
 
@@ -68,14 +72,9 @@ namespace UI
             _showHideAnimation.DOPlayForward();
         }
 
-        private void Hide(System.Action onComplete = null)
+        private void Hide()
         {
             _showHideAnimation.DOPlayBackwards();
-            _showHideAnimation.tween.OnComplete(() =>
-            {
-                gameObject.SetActive(false);
-                onComplete?.Invoke();
-            });
         }
 
         public void Dispose()
