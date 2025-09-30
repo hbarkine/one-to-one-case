@@ -3,6 +3,7 @@ using Configs;
 using Controllers;
 using Managers;
 using Signals;
+using UI;
 using UnityEngine;
 using Zenject;
 
@@ -19,24 +20,37 @@ namespace Installers
         
         [SerializeField]
         private PlayerController _playerController;
+
+        [SerializeField]
+        private MainMenuController _mainMenuController;
+
+        [SerializeField]
+        private HUDController _hudController;
         
         public override void InstallBindings()
         {
             SignalBusInstaller.Install(Container);
-            
+            DeclareSignals();
+
             // Bind GameConfig
-            Container.BindInterfacesAndSelfTo<GameConfig>().FromInstance(_gameConfig);
+            Container.Bind<GameConfig>().FromInstance(_gameConfig);
             
             // Bind LevelManager from scene
-            Container.Bind<LevelManager>().FromInstance(_levelManager).AsSingle();
+            Container.BindInterfacesAndSelfTo<LevelManager>().FromInstance(_levelManager);
             
             // Bind PlayerController from scene
-            Container.Bind<PlayerController>().FromInstance(_playerController).AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerController>().FromInstance(_playerController);
+
+            // Bind UI Controllers from scene
+            Container.BindInterfacesAndSelfTo<MainMenuController>().FromInstance(_mainMenuController);
+
+            // Bind HUD Controllers from scene
+            Container.BindInterfacesAndSelfTo<HUDController>().FromInstance(_hudController);
             
             // Bind GameController
             Container.BindInterfacesAndSelfTo<GameController>().AsSingle().NonLazy();
             
-            DeclareSignals();
+            Container.BindInterfacesAndSelfTo<GameStateMachine>().AsSingle().NonLazy();
         }
 
         public void DeclareSignals()
@@ -45,6 +59,7 @@ namespace Installers
             Container.DeclareSignal<CardSelectedSignal>();
             Container.DeclareSignal<ScoreUpdatedSignal>();
             Container.DeclareSignal<GameCompletedSignal>();
+            Container.DeclareSignal<RoundChangedSignal>();
             Container.DeclareSignal<StartLevelSignal>();
         }
     }

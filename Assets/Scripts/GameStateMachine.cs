@@ -1,4 +1,5 @@
 using System;
+using Signals;
 using Stateless;
 using Zenject;
 
@@ -19,9 +20,10 @@ public class GameStateMachine : IInitializable, IDisposable
     {
         LoadMenuTrigger,
         PlayTrigger,
+        GameCompletedTrigger
     }
     
-    private StateMachine<GameState, GameStateMachineTrigger> _gameStateMachine;
+    private StateMachine<GameState, GameStateMachineTrigger> _gameStateMachine = new StateMachine<GameState, GameStateMachineTrigger>();
 
     public void Initialize()
     {
@@ -37,30 +39,44 @@ public class GameStateMachine : IInitializable, IDisposable
         _gameStateMachine.Configure(GameState.Playing)
             .OnEntry(OnPlayingEntry)
             .OnExit(OnPlayingExit)
-            .Permit(GameStateMachineTrigger.PlayTrigger, GameState.Playing);
+            .Permit(GameStateMachineTrigger.GameCompletedTrigger, GameState.Menu);
         
         _gameStateMachine.Activate();
     }
 
-    private void OnPlayingExit()
-    {
-    }
-
-    private void OnPlayingEntry()
-    {
-    }
-
     private void OnMenuEntry()
     {
-        
+        _signalBus.Subscribe<GameStartedSignal>(OnGameStarted);
     }
     
     private void OnMenuExit()
     {
+        _signalBus.TryUnsubscribe<GameStartedSignal>(OnGameStarted);
+    }
+
+    private void OnPlayingEntry()
+    {
+        _signalBus.Subscribe<GameCompletedSignal>(OnGameCompleted);
+    }
+
+    private void OnPlayingExit()
+    {
+        _signalBus.TryUnsubscribe<GameCompletedSignal>(OnGameCompleted);
+    }
+
+    private void OnGameStarted(GameStartedSignal signal)
+    {
+        _gameStateMachine.Fire(GameStateMachineTrigger.PlayTrigger);
+    }
+
+    private void OnGameCompleted(GameCompletedSignal signal)
+    {
+        _gameStateMachine.Fire(GameStateMachineTrigger.GameCompletedTrigger);
     }
 
     public void Dispose()
     {
-        // TODO release managed resources here
+        _signalBus.TryUnsubscribe<GameStartedSignal>(OnGameStarted);
+        _signalBus.TryUnsubscribe<GameCompletedSignal>(OnGameCompleted);
     }
 }

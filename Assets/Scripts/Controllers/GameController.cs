@@ -97,6 +97,7 @@ namespace Controllers
             _currentRound = signal.RoundCount;
             _currentScore = 0;
             _comboCounter = 0;
+            _signalBus.Fire(new RoundChangedSignal { CurrentRound = _currentRound });
             _stateMachine.Fire(GameControllerTrigger.GameStarted);
         }
 
@@ -175,7 +176,7 @@ namespace Controllers
             
             _currentScore += _comboCounter;
             
-            _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore });
+            _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
 
             _levelManager.StartCoroutine(MatchSuccessAnimationRoutine());
         }
@@ -198,6 +199,7 @@ namespace Controllers
                 else
                 {
                     _currentRound++;
+                    _signalBus.Fire(new RoundChangedSignal { CurrentRound = _currentRound });
                     _stateMachine.Fire(GameControllerTrigger.AllCardsCompleted);
                 }
             }
@@ -213,7 +215,7 @@ namespace Controllers
             
             _currentScore = Mathf.Max(0, _currentScore - 1);
 
-            _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore });
+            _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
             
             _levelManager.StartCoroutine(MatchFailAnimationRoutine());
         }
