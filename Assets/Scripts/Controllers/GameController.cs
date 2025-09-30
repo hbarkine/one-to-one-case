@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Configs;
+using DG.Tweening;
 using Managers;
 using Signals;
 using Stateless;
@@ -23,6 +24,7 @@ namespace Controllers
 
         private enum GameControllerState
         {
+            InitialState,
             WaitingForGameStart,
             InitializeRound,
             ChoosingCards,
@@ -32,6 +34,7 @@ namespace Controllers
 
         private enum GameControllerTrigger
         {
+            StartWaitingTrigger,
             GameStarted,
             RoundInitialized,
             FirstCardSelected,
@@ -58,10 +61,15 @@ namespace Controllers
 
         public void Initialize()
         {
-            _stateMachine = new StateMachine<GameControllerState, GameControllerTrigger>(GameControllerState.WaitingForGameStart);
+            _stateMachine = new StateMachine<GameControllerState, GameControllerTrigger>(GameControllerState.InitialState);
+
+            _stateMachine.Configure(GameControllerState.InitialState)
+                .OnActivate(() => _stateMachine.Fire(GameControllerTrigger.StartWaitingTrigger))
+                .Permit(GameControllerTrigger.StartWaitingTrigger, GameControllerState.WaitingForGameStart);
 
             _stateMachine.Configure(GameControllerState.WaitingForGameStart)
                 .OnEntry(OnWaitingForGameStartEntry)
+                .OnExit(OnWaitingForGameStartExit)
                 .Permit(GameControllerTrigger.GameStarted, GameControllerState.InitializeRound);
 
             _stateMachine.Configure(GameControllerState.InitializeRound)
@@ -91,10 +99,15 @@ namespace Controllers
         {
             _signalBus.Subscribe<GameStartedSignal>(OnGameStarted);
         }
+        
+        private void OnWaitingForGameStartExit()
+        {
+            _signalBus.Unsubscribe<GameStartedSignal>(OnGameStarted);
+        }
 
         private void OnGameStarted(GameStartedSignal signal)
         {
-            _currentRound = signal.RoundCount;
+            _currentRound = 1;
             _currentDifficulty = signal.DifficultyConfig;
             _currentScore = 0;
             _comboCounter = 0;
@@ -160,15 +173,19 @@ namespace Controllers
             {
                 _secondSelectedCard = signal.CardComponent;
                 _secondSelectedCard.Show();
+
+                DOVirtual.DelayedCall(1f, () => 
+                {
+                    if (_firstSelectedCard.AssignedCardConfig.CardId == _secondSelectedCard.AssignedCardConfig.CardId)
+                    {
+                        _stateMachine.Fire(GameControllerTrigger.CardsMatched);
+                    }
+                    else
+                    {
+                        _stateMachine.Fire(GameControllerTrigger.CardsMismatched);
+                    } 
+                });
                 
-                if (_firstSelectedCard.AssignedCardConfig.CardId == _secondSelectedCard.AssignedCardConfig.CardId)
-                {
-                    _stateMachine.Fire(GameControllerTrigger.CardsMatched);
-                }
-                else
-                {
-                    _stateMachine.Fire(GameControllerTrigger.CardsMismatched);
-                }
             }
         }
 

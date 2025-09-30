@@ -77,7 +77,7 @@ MonoBehaviour:
       m_Calls: []
   targetIsSelf: 0
   targetGO: {fileID: 1461622210937413334}
-  tweenTargetIsTargetGO: 1
+  tweenTargetIsTargetGO: 0
   delay: 0
   duration: 0.3
   easeType: 6
@@ -185,7 +185,7 @@ MonoBehaviour:
       m_Calls: []
   targetIsSelf: 0
   targetGO: {fileID: 1461622210937413334}
-  tweenTargetIsTargetGO: 1
+  tweenTargetIsTargetGO: 0
   delay: 0
   duration: 0.4
   easeType: 26
@@ -541,7 +541,7 @@ MonoBehaviour:
       m_Calls: []
   targetIsSelf: 0
   targetGO: {fileID: 1461622210937413334}
-  tweenTargetIsTargetGO: 1
+  tweenTargetIsTargetGO: 0
   delay: 0
   duration: 0.4
   easeType: 27
