@@ -17,6 +17,9 @@ namespace Installers
         [SerializeField]
         private LevelManager _levelManager;
         
+        [SerializeField]
+        private PlayerController _playerController;
+        
         public override void InstallBindings()
         {
             SignalBusInstaller.Install(Container);
@@ -26,6 +29,9 @@ namespace Installers
             
             // Bind LevelManager from scene
             Container.Bind<LevelManager>().FromInstance(_levelManager).AsSingle();
+            
+            // Bind PlayerController from scene
+            Container.Bind<PlayerController>().FromInstance(_playerController).AsSingle();
             
             // Bind GameController
             Container.BindInterfacesAndSelfTo<GameController>().AsSingle().NonLazy();
