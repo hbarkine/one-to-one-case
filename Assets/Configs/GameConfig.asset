@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7887e5105e47559234e2b70d432119, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  DifficultyConfigs:
+  - {fileID: 11400000, guid: e3893661d17db4f8aa1f161093cb7324, type: 2}
+  - {fileID: 11400000, guid: c0c43e012053a42eea7f3377c42f6891, type: 2}
+  - {fileID: 11400000, guid: 01479779e1fcc4a6ab520c37662fa465, type: 2}
+  - {fileID: 11400000, guid: 42764001861854310940793d9bd1a3f7, type: 2}
+  - {fileID: 11400000, guid: 0da0237cc5907455dbc35fa5d5f67287, type: 2}
+  AllCardsConfigs:
+  - {fileID: 11400000, guid: 39cfbe224916142e2bf81f080dbbc91b, type: 2}
+  - {fileID: 11400000, guid: 2cdcc02fcc3924d628f04be5a53999f5, type: 2}
+  - {fileID: 11400000, guid: ffdbd46bf6f97471284ad8eafeadb82d, type: 2}
+  - {fileID: 11400000, guid: 5dd755fb6126e4ab69f1a8dd7886d554, type: 2}
+  - {fileID: 11400000, guid: 64492ef89fdaa4f6aaec3d7e64c8cf2d, type: 2}
+  - {fileID: 11400000, guid: 060231c01a1754ce3920740d280a877c, type: 2}
+  - {fileID: 11400000, guid: 4f5f75a8d357c470487b4afcab1d09e5, type: 2}
+  - {fileID: 11400000, guid: e833437d7e3e44658ab7f5ff915ef3d3, type: 2}
+  - {fileID: 11400000, guid: c8c4771403f7b419c82f791531dadcbf, type: 2}
+  - {fileID: 11400000, guid: c3c4dac2f4e7c4a729555fe30373262c, type: 2}
+  - {fileID: 11400000, guid: 32a1c3526266344c2998ab292d399df8, type: 2}
+  TotalRounds: 5
+  CardShowDuration: 2

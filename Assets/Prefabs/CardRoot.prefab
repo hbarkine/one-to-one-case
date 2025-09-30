@@ -335,6 +335,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1461622210937413335}
   - component: {fileID: 1461622210937413328}
+  - component: {fileID: 1542105317319386852}
   m_Layer: 0
   m_Name: CardRoot
   m_TagString: Untagged
@@ -372,6 +373,21 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 0.27}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1542105317319386852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1461622210937413334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d00bfc00694540f8baf21d0fc5c8210, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rotateShowAnimation: {fileID: 1461622211108605739}
+  _scaleDownAnimation: {fileID: 1461622210297749644}
+  _iconImage: {fileID: 1461622210741029250}
 --- !u!1 &1461622211035167302
 GameObject:
   m_ObjectHideFlags: 0
