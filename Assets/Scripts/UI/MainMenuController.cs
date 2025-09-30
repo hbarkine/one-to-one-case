@@ -1,30 +1,88 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Configs;
+using DG.Tweening;
+using Signals;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace UI
 {
-    public class MainMenuController : MonoBehaviour, IInitializable
+    public class MainMenuController : MonoBehaviour, IInitializable, IDisposable
     {
         [SerializeField]
-        private Dropdown _difficultyDropdown;
+        private TMP_Dropdown _difficultyDropdown;
+
+        [SerializeField]
+        private Button _startGameButton;
+
+        [SerializeField]
+        private DOTweenAnimation _showHideAnimation;
 
         [Inject]
         private GameConfig _gameConfig;
+
+        [Inject]
+        private SignalBus _signalBus;
+
+        private int _selectedDifficultyIndex;
 
         public void Initialize()
         {
             List<string> difficulties =
                 _gameConfig.DifficultyConfigs.Select(config => config.Difficulty.ToString()).ToList();
             _difficultyDropdown.AddOptions(difficulties);
+            
+            _difficultyDropdown.onValueChanged.AddListener(OnDifficultyChanged);
+            _startGameButton.onClick.AddListener(OnStartGameButtonClicked);
+            
+            _signalBus.Subscribe<GameCompletedSignal>(OnGameCompleted);
+            
+            Show();
         }
-        
+
+        private void OnDifficultyChanged(int index)
+        {
+            _selectedDifficultyIndex = index;
+        }
+
         public void OnStartGameButtonClicked()
         {
-            
+            Hide(() =>
+            {
+                _signalBus.Fire(new GameStartedSignal { RoundCount = 1 });
+            });
+        }
+
+        private void OnGameCompleted(GameCompletedSignal signal)
+        {
+            Show();
+        }
+
+        private void Show()
+        {
+            gameObject.SetActive(true);
+            _showHideAnimation.DOPlayForward();
+        }
+
+        private void Hide(System.Action onComplete = null)
+        {
+            _showHideAnimation.DOPlayBackwards();
+            _showHideAnimation.tween.OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+                onComplete?.Invoke();
+            });
+        }
+
+        public void Dispose()
+        {
+            _difficultyDropdown.onValueChanged.RemoveListener(OnDifficultyChanged);
+            _startGameButton.onClick.RemoveListener(OnStartGameButtonClicked);
+            _signalBus.TryUnsubscribe<GameCompletedSignal>(OnGameCompleted);
         }
     }
 }
