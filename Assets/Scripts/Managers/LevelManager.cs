@@ -73,7 +73,7 @@ namespace Managers
                 }
             }
             
-            float scaleFactor = _scaleMultiplier / Mathf.Max(gridX, gridY);
+            float scaleFactor = 1 - (Mathf.Max(gridX, gridY) * _scaleMultiplier);
             _cardContainer.localScale = Vector3.one * scaleFactor;
         }
 
