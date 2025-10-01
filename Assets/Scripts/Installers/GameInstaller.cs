@@ -18,6 +18,9 @@ namespace Installers
         
         [SerializeField]
         private LevelManager _levelManager;
+
+        [SerializeField]
+        private SoundManager _soundManager;
         
         [SerializeField]
         private PlayerController _playerController;
@@ -38,6 +41,9 @@ namespace Installers
             
             // Bind LevelManager from scene
             Container.BindInterfacesAndSelfTo<LevelManager>().FromInstance(_levelManager);
+
+            // Bind SoundManager from scene
+            Container.Bind<SoundManager>().FromInstance(_soundManager).AsSingle();
             
             // Bind PlayerController from scene
             Container.BindInterfacesAndSelfTo<PlayerController>().FromInstance(_playerController);

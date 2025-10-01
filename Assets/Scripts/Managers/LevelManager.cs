@@ -22,6 +22,9 @@ namespace Managers
         [Inject]
         private GameConfig _gameConfig;
 
+        [Inject]
+        private DiContainer _container;
+
         private List<CardComponent> _activeCards = new List<CardComponent>();
 
         public List<CardComponent> ActiveCards => _activeCards;
@@ -66,6 +69,10 @@ namespace Managers
 
                     CardComponent card = Instantiate(_cardPrefab, _cardContainer);
                     card.transform.localPosition = position;
+                    
+                    // Inject dependencies into the instantiated card
+                    _container.InjectGameObject(card.gameObject);
+                    
                     card.Initialize(cardPairs[cardIndex], new Vector2(x, y));
                     
                     _activeCards.Add(card);

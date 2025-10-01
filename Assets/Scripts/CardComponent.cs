@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using Configs;
 using DG.Tweening;
+using Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class CardComponent : MonoBehaviour
 {
@@ -15,6 +17,9 @@ public class CardComponent : MonoBehaviour
 
     [SerializeField]
     private Image _iconImage;
+
+    [Inject]
+    private SoundManager _soundManager;
 
     private CardConfig _assignedCardConfig;
 
@@ -28,6 +33,7 @@ public class CardComponent : MonoBehaviour
 
     public void Show()
     {
+        _soundManager.PlayCardFlip();
         _rotateShowAnimation.DOPlayForward();
     }
 

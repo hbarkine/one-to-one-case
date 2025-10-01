@@ -26,6 +26,9 @@ namespace Controllers
         [Inject]
         private GameDataService _gameDataService;
 
+        [Inject]
+        private SoundManager _soundManager;
+
         private enum GameControllerState
         {
             InitialState,
@@ -228,6 +231,8 @@ namespace Controllers
             
             _currentScore += _comboCounter;
             
+            _soundManager.PlayCardMatch();
+            
             _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
             
             _signalBus.Subscribe<ReturnToMenuSignal>(OnReturnToMenu);
@@ -261,6 +266,8 @@ namespace Controllers
                     _gameDataService.CurrentGameData.ClearCurrentGame();
                     _gameDataService.SaveGameData();
                     
+                    _soundManager.PlayGameOver();
+                    
                     _signalBus.Fire(new GameCompletedSignal { Score = _currentScore });
                     _stateMachine.Fire(GameControllerTrigger.AllRoundsCompleted);
                 }
@@ -290,6 +297,8 @@ namespace Controllers
             _comboCounter = 0;
             
             _currentScore = Mathf.Max(0, _currentScore - 1);
+
+            _soundManager.PlayCardMismatch();
 
             _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
             
