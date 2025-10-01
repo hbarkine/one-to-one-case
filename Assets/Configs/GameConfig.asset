@@ -30,5 +30,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c8c4771403f7b419c82f791531dadcbf, type: 2}
   - {fileID: 11400000, guid: c3c4dac2f4e7c4a729555fe30373262c, type: 2}
   - {fileID: 11400000, guid: 32a1c3526266344c2998ab292d399df8, type: 2}
-  TotalRounds: 5
+  TotalRounds: 3
   CardShowDuration: 2

@@ -35,14 +35,12 @@ namespace UI
             _signalBus.Subscribe<ScoreUpdatedSignal>(OnScoreUpdated);
             _signalBus.Subscribe<RoundChangedSignal>(OnRoundChanged);
             _signalBus.Subscribe<GameCompletedSignal>(OnGameCompleted);
-
-            gameObject.SetActive(false);
         }
 
         private void OnGameStarted(GameStartedSignal signal)
         {
             _currentScore = 0;
-            _currentRound = signal.RoundCount;
+            _currentRound = 1;
             _currentCombo = 0;
             UpdateDisplay();
             Show();
@@ -92,17 +90,12 @@ namespace UI
 
         private void Show()
         {
-            gameObject.SetActive(true);
             _showHideAnimation.DOPlayForward();
         }
 
         private void Hide()
         {
             _showHideAnimation.DOPlayBackwards();
-            _showHideAnimation.tween.OnComplete(() =>
-            {
-                gameObject.SetActive(false);
-            });
         }
 
         public void Dispose()
