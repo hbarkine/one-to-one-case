@@ -1,5 +1,7 @@
 using System;
+using Configs;
 using DG.Tweening;
+using Services;
 using Signals;
 using TMPro;
 using UnityEngine;
@@ -23,6 +25,9 @@ namespace UI
         private TextMeshProUGUI _difficultyText;
 
         [SerializeField]
+        private TextMeshProUGUI _highScoreText;
+
+        [SerializeField]
         private Button _returnToMenuButton;
 
         [SerializeField]
@@ -30,6 +35,12 @@ namespace UI
 
         [Inject]
         private SignalBus _signalBus;
+
+        [Inject]
+        private GameConfig _gameConfig;
+
+        [Inject]
+        private GameDataService _gameDataService;
 
         private int _currentScore;
         private int _currentRound;
@@ -51,6 +62,12 @@ namespace UI
             _difficultyText.text = signal.DifficultyConfig.Difficulty.ToString();
             _currentScore = signal.CurrentScore;
             _currentRound = signal.RoundCount;
+            
+            // Update high score for current difficulty
+            int difficultyIndex = _gameConfig.DifficultyConfigs.IndexOf(signal.DifficultyConfig);
+            int highScore = _gameDataService.CurrentGameData.GetHighScore(difficultyIndex);
+            _highScoreText.text = $"High Score: {highScore}";
+            
             UpdateDisplay();
             Show();
         }
