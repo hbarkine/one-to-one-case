@@ -3,6 +3,7 @@ using DG.Tweening;
 using Signals;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace UI
@@ -19,6 +20,12 @@ namespace UI
         private TextMeshProUGUI _comboText;
 
         [SerializeField]
+        private TextMeshProUGUI _difficultyText;
+
+        [SerializeField]
+        private Button _returnToMenuButton;
+
+        [SerializeField]
         private DOTweenAnimation _showHideAnimation;
 
         [Inject]
@@ -31,6 +38,8 @@ namespace UI
 
         public void Initialize()
         {
+            _returnToMenuButton.onClick.AddListener(OnReturnToMenuClicked);
+            
             _signalBus.Subscribe<GameStartedSignal>(OnGameStarted);
             _signalBus.Subscribe<ScoreUpdatedSignal>(OnScoreUpdated);
             _signalBus.Subscribe<RoundChangedSignal>(OnRoundChanged);
@@ -39,9 +48,9 @@ namespace UI
 
         private void OnGameStarted(GameStartedSignal signal)
         {
-            _currentScore = 0;
-            _currentRound = 1;
-            _currentCombo = 0;
+            _difficultyText.text = signal.DifficultyConfig.Difficulty.ToString();
+            _currentScore = signal.CurrentScore;
+            _currentRound = signal.RoundCount;
             UpdateDisplay();
             Show();
         }
@@ -64,6 +73,11 @@ namespace UI
         private void OnGameCompleted(GameCompletedSignal signal)
         {
             Hide();
+        }
+
+        private void OnReturnToMenuClicked()
+        {
+            _signalBus.Fire<ReturnToMenuSignal>();
         }
 
         private void UpdateDisplay()
@@ -100,6 +114,8 @@ namespace UI
 
         public void Dispose()
         {
+            _returnToMenuButton.onClick.RemoveListener(OnReturnToMenuClicked);
+            
             _signalBus.TryUnsubscribe<GameStartedSignal>(OnGameStarted);
             _signalBus.TryUnsubscribe<ScoreUpdatedSignal>(OnScoreUpdated);
             _signalBus.TryUnsubscribe<RoundChangedSignal>(OnRoundChanged);

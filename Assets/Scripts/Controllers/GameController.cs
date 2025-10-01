@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Configs;
 using DG.Tweening;
 using Managers;
+using Services;
 using Signals;
 using Stateless;
 using UnityEngine;
@@ -21,6 +22,9 @@ namespace Controllers
 
         [Inject]
         private GameConfig _gameConfig;
+
+        [Inject]
+        private GameDataService _gameDataService;
 
         private enum GameControllerState
         {
@@ -43,7 +47,8 @@ namespace Controllers
             CardsMismatched,
             AnimationCompleted,
             AllCardsCompleted,
-            AllRoundsCompleted
+            AllRoundsCompleted,
+            ReturnToMenuTrigger
         }
 
         private StateMachine<GameControllerState, GameControllerTrigger> _stateMachine;
@@ -74,23 +79,30 @@ namespace Controllers
 
             _stateMachine.Configure(GameControllerState.InitializeRound)
                 .OnEntry(OnInitializeRoundEntry)
-                .Permit(GameControllerTrigger.RoundInitialized, GameControllerState.ChoosingCards);
+                .OnExit(OnInitializeRoundExit)
+                .Permit(GameControllerTrigger.RoundInitialized, GameControllerState.ChoosingCards)
+                .Permit(GameControllerTrigger.ReturnToMenuTrigger, GameControllerState.WaitingForGameStart);
 
             _stateMachine.Configure(GameControllerState.ChoosingCards)
                 .OnEntry(OnChoosingCardsEntry)
                 .OnExit(OnChoosingCardsExit)
                 .Permit(GameControllerTrigger.CardsMatched, GameControllerState.MatchSuccess)
-                .Permit(GameControllerTrigger.CardsMismatched, GameControllerState.MatchFail);
+                .Permit(GameControllerTrigger.CardsMismatched, GameControllerState.MatchFail)
+                .Permit(GameControllerTrigger.ReturnToMenuTrigger, GameControllerState.WaitingForGameStart);
 
             _stateMachine.Configure(GameControllerState.MatchSuccess)
                 .OnEntry(OnMatchSuccessEntry)
+                .OnExit(OnMatchSuccessExit)
                 .Permit(GameControllerTrigger.AllCardsCompleted, GameControllerState.InitializeRound)
                 .Permit(GameControllerTrigger.AllRoundsCompleted, GameControllerState.WaitingForGameStart)
-                .Permit(GameControllerTrigger.AnimationCompleted, GameControllerState.ChoosingCards);
+                .Permit(GameControllerTrigger.AnimationCompleted, GameControllerState.ChoosingCards)
+                .Permit(GameControllerTrigger.ReturnToMenuTrigger, GameControllerState.WaitingForGameStart);
 
             _stateMachine.Configure(GameControllerState.MatchFail)
                 .OnEntry(OnMatchFailEntry)
-                .Permit(GameControllerTrigger.AnimationCompleted, GameControllerState.ChoosingCards);
+                .OnExit(OnMatchFailExit)
+                .Permit(GameControllerTrigger.AnimationCompleted, GameControllerState.ChoosingCards)
+                .Permit(GameControllerTrigger.ReturnToMenuTrigger, GameControllerState.WaitingForGameStart);
 
             _stateMachine.Activate();
         }
@@ -107,15 +119,26 @@ namespace Controllers
 
         private void OnGameStarted(GameStartedSignal signal)
         {
-            _currentRound = 1;
+            _currentRound = signal.RoundCount;
             _currentDifficulty = signal.DifficultyConfig;
-            _currentScore = 0;
+            _currentScore = signal.CurrentScore;
             _comboCounter = 0;
+            
+            // Save game state
+            SaveGameProgress();
+            
             _signalBus.Fire(new RoundChangedSignal 
             { 
                 CurrentRound = _currentRound,
                 TotalRounds = _gameConfig.TotalRounds
             });
+            
+            // If loading a saved game, update the score display
+            if (_currentScore > 0)
+            {
+                _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
+            }
+            
             _stateMachine.Fire(GameControllerTrigger.GameStarted);
         }
 
@@ -129,7 +152,14 @@ namespace Controllers
             
             _levelManager.InitializeLevel(_currentDifficulty);
             
+            _signalBus.Subscribe<ReturnToMenuSignal>(OnReturnToMenu);
+            
             _levelManager.StartCoroutine(ShowAndHideCardsRoutine());
+        }
+
+        private void OnInitializeRoundExit()
+        {
+            _signalBus.TryUnsubscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
 
         private IEnumerator ShowAndHideCardsRoutine()
@@ -155,11 +185,13 @@ namespace Controllers
             _secondSelectedCard = null;
             
             _signalBus.Subscribe<CardSelectedSignal>(OnCardSelected);
+            _signalBus.Subscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
 
         private void OnChoosingCardsExit()
         {
             _signalBus.TryUnsubscribe<CardSelectedSignal>(OnCardSelected);
+            _signalBus.TryUnsubscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
 
         private void OnCardSelected(CardSelectedSignal signal)
@@ -197,8 +229,15 @@ namespace Controllers
             _currentScore += _comboCounter;
             
             _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
+            
+            _signalBus.Subscribe<ReturnToMenuSignal>(OnReturnToMenu);
 
             _levelManager.StartCoroutine(MatchSuccessAnimationRoutine());
+        }
+
+        private void OnMatchSuccessExit()
+        {
+            _signalBus.TryUnsubscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
 
         private IEnumerator MatchSuccessAnimationRoutine()
@@ -213,12 +252,25 @@ namespace Controllers
             {
                 if (_currentRound >= _gameConfig.TotalRounds)
                 {
+                    // Reset the level and destroy all cards
+                    _levelManager.Reset();
+                    
+                    // Game completed - update high score and clear saved game
+                    int difficultyIndex = _gameConfig.DifficultyConfigs.IndexOf(_currentDifficulty);
+                    _gameDataService.CurrentGameData.UpdateHighScore(difficultyIndex, _currentScore);
+                    _gameDataService.CurrentGameData.ClearCurrentGame();
+                    _gameDataService.SaveGameData();
+                    
                     _signalBus.Fire(new GameCompletedSignal { Score = _currentScore });
                     _stateMachine.Fire(GameControllerTrigger.AllRoundsCompleted);
                 }
                 else
                 {
                     _currentRound++;
+                    
+                    // Save progress for next round
+                    SaveGameProgress();
+                    
                     _signalBus.Fire(new RoundChangedSignal 
                     { 
                         CurrentRound = _currentRound,
@@ -241,7 +293,14 @@ namespace Controllers
 
             _signalBus.Fire(new ScoreUpdatedSignal { Score = _currentScore, Combo = _comboCounter });
             
+            _signalBus.Subscribe<ReturnToMenuSignal>(OnReturnToMenu);
+            
             _levelManager.StartCoroutine(MatchFailAnimationRoutine());
+        }
+
+        private void OnMatchFailExit()
+        {
+            _signalBus.TryUnsubscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
 
         private IEnumerator MatchFailAnimationRoutine()
@@ -255,10 +314,39 @@ namespace Controllers
             _stateMachine.Fire(GameControllerTrigger.AnimationCompleted);
         }
 
+        private void OnReturnToMenu()
+        {
+            // Stop all coroutines
+            _levelManager.StopAllCoroutines();
+            
+            // Reset the level and destroy all cards
+            _levelManager.Reset();
+            
+            // Clear saved game progress
+            _gameDataService.CurrentGameData.ClearCurrentGame();
+            _gameDataService.SaveGameData();
+            
+            // Transition state machine back to waiting state
+            _stateMachine.Fire(GameControllerTrigger.ReturnToMenuTrigger);
+            
+            // Hide HUD and go back to menu
+            _signalBus.Fire(new GameCompletedSignal { Score = _currentScore });
+        }
+
+        private void SaveGameProgress()
+        {
+            int difficultyIndex = _gameConfig.DifficultyConfigs.IndexOf(_currentDifficulty);
+            _gameDataService.CurrentGameData.CurrentDifficulty = difficultyIndex;
+            _gameDataService.CurrentGameData.CurrentRoundCount = _currentRound;
+            _gameDataService.CurrentGameData.CurrentScore = _currentScore;
+            _gameDataService.SaveGameData();
+        }
+
         public void Dispose()
         {
             _signalBus.TryUnsubscribe<GameStartedSignal>(OnGameStarted);
             _signalBus.TryUnsubscribe<CardSelectedSignal>(OnCardSelected);
+            _signalBus.TryUnsubscribe<ReturnToMenuSignal>(OnReturnToMenu);
         }
     }
 } 

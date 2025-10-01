@@ -2,6 +2,7 @@
 using Configs;
 using Controllers;
 using Managers;
+using Services;
 using Signals;
 using UI;
 using UnityEngine;
@@ -47,6 +48,9 @@ namespace Installers
             // Bind HUD Controllers from scene
             Container.BindInterfacesAndSelfTo<HUDController>().FromInstance(_hudController);
             
+            // Bind Services
+            Container.BindInterfacesAndSelfTo<GameDataService>().AsSingle().NonLazy();
+            
             // Bind GameController
             Container.BindInterfacesAndSelfTo<GameController>().AsSingle().NonLazy();
             
@@ -55,11 +59,13 @@ namespace Installers
 
         public void DeclareSignals()
         {
+            Container.DeclareSignal<MenuLoadedSignal>();
             Container.DeclareSignal<GameStartedSignal>();
             Container.DeclareSignal<CardSelectedSignal>();
             Container.DeclareSignal<ScoreUpdatedSignal>();
             Container.DeclareSignal<GameCompletedSignal>();
             Container.DeclareSignal<RoundChangedSignal>();
+            Container.DeclareSignal<ReturnToMenuSignal>();
             Container.DeclareSignal<StartLevelSignal>();
         }
     }

@@ -39,9 +39,8 @@ namespace UI
             _difficultyDropdown.onValueChanged.AddListener(OnDifficultyChanged);
             _startGameButton.onClick.AddListener(OnStartGameButtonClicked);
             
+            _signalBus.Subscribe<MenuLoadedSignal>(OnMenuLoaded);
             _signalBus.Subscribe<GameCompletedSignal>(OnGameCompleted);
-            
-            Show();
         }
 
         private void OnDifficultyChanged(int index)
@@ -56,9 +55,15 @@ namespace UI
             Hide();
             _signalBus.Fire(new GameStartedSignal 
             { 
-                RoundCount = _gameConfig.TotalRounds,
+                RoundCount = 1,
+                CurrentScore = 0,
                 DifficultyConfig = selectedDifficulty
             });
+        }
+
+        private void OnMenuLoaded()
+        {
+            Show();
         }
 
         private void OnGameCompleted(GameCompletedSignal signal)
@@ -68,7 +73,6 @@ namespace UI
 
         private void Show()
         {
-            gameObject.SetActive(true);
             _showHideAnimation.DOPlayForward();
         }
 
@@ -81,6 +85,7 @@ namespace UI
         {
             _difficultyDropdown.onValueChanged.RemoveListener(OnDifficultyChanged);
             _startGameButton.onClick.RemoveListener(OnStartGameButtonClicked);
+            _signalBus.TryUnsubscribe<MenuLoadedSignal>(OnMenuLoaded);
             _signalBus.TryUnsubscribe<GameCompletedSignal>(OnGameCompleted);
         }
     }
